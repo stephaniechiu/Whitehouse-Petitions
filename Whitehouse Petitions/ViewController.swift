@@ -14,15 +14,30 @@ class ViewController: UITableViewController {
        override func viewDidLoad() {
            super.viewDidLoad()
            
-           let urlString = "https://api.whitehouse.gov/v1/petitions.json?limit=100"
+        let urlString: String
     
-        if let url = URL(string: urlString) {
-            if let data = try? Data(contentsOf: url){
-                parse(json:data)
-            }
+        if navigationController?.tabBarItem.tag == 0 {
+            urlString = "https://api.whitehouse.gov/v1/petitions.json?limit=100"
+        } else {
+           //will only show the most 100 popular petitions
+            urlString = "https://api.whitehouse.gov/v1/petitions.json?signatureCountFloor=10000&limit=100"
         }
+        
+            if let url = URL(string: urlString) {
+                if let data = try? Data(contentsOf: url){
+                    parse(json:data)
+                }
+            }
+            showError()
+        }
+//Show error message if unable to parse JSON file
+    func showError() {
+        let ac = UIAlertController(title: "Loading error", message: "There was a problem loading the feed; please check your connection and try again", preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "OK", style: .default))
+        present(ac, animated: true)
     }
-    
+
+//Parsing data from JSON file
     func parse(json: Data) {
         let decoder = JSONDecoder()
         
@@ -31,7 +46,8 @@ class ViewController: UITableViewController {
             tableView.reloadData()
         }
     }
-    
+
+//Table View
         override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return petitions.count
     }
